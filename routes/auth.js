@@ -11,7 +11,7 @@ const localAuth = passport.authenticate('local', options);
 const jwtAuth = passport.authenticate('jwt', { session: false, failWithError: true });
 
 const createAuthToken = function(user){
-  return jwt.sign({user}, JWT_SECRET, {
+  return jwt.sign({user}, JWT_SECRET, {//encode the token
     subject: user.username,
     expiresIn: JWT_EXPIRY
   });
