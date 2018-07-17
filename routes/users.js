@@ -3,9 +3,9 @@
 const express = require('express');
 const User = require('../models/user');
 const router = express.Router();
+const passport = require('passport');
 
-
-
+// router.use(('/', passport.authenticate('jwt', { session: false, failWithError: true })));
 router.post('/users', (req, res, next)=>{
   let {fullName, username, password} = req.body;
   //validate that all required fields complete
