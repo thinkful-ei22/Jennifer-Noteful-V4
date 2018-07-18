@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const Note = require('../models/note');
+const Folder = require('../models/folder');
 
 const router = express.Router();
 
@@ -13,9 +14,8 @@ router.use(('/', passport.authenticate('jwt', { session: false, failWithError: t
 router.get('/', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
   const userId = req.user.id;
-
   let filter = {userId};
-
+console.log(req.query);
   if (searchTerm) {
     const re = new RegExp(searchTerm, 'i');
     filter.$or = [{ 'title': re }, { 'content': re }];
@@ -28,9 +28,10 @@ router.get('/', (req, res, next) => {
   if (tagId) {
     filter.tags = tagId;
   }
-
+  
   Note.find(filter)
-    .populate('tags')
+    .populate('tags') 
+    .populate('folderId')
     .sort({ updatedAt: 'desc' })
     .then(results => {
       res.json(results);
@@ -38,6 +39,7 @@ router.get('/', (req, res, next) => {
     .catch(err => {
       next(err);
     });
+    
 });
 
 /* ========== GET/READ A SINGLE ITEM ========== */
@@ -69,7 +71,7 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
   const userId = req.user.id;
-
+ 
   /***** Never trust users - validate input *****/
   if (!title) {
     const err = new Error('Missing `title` in request body');
