@@ -12,14 +12,14 @@ const router = express.Router();
 router.use(('/', passport.authenticate('jwt', { session: false, failWithError: true })));
 
 const validateFolderId = function(folderId, userId){
-  if(folderId === null || folderId === '') {
+  if(folderId === null || folderId === ''||folderId===undefined) {
     return Promise.resolve();
   }
-  // if(!mongoose.Types.ObjectId.isValid(folderId)){
-  //   const err = new Error('The `folderId` is not valid');
-  //   err.status = 400;
-  //   return Promise.reject(err);
-  // }
+  if(!mongoose.Types.ObjectId.isValid(folderId)){
+    const err = new Error('The `folderId` is not valid');
+    err.status = 400;
+    return Promise.reject(err);
+  }
   return Folder.count({_id: folderId, userId})
     .then(count => {
       if (count === 0) {
