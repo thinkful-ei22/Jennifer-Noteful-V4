@@ -3,7 +3,8 @@ node_js: node
 services: mongodb
 deploy:
   provider: heroku
-  api_key: e0281d26-1e26-4656-b4f0-164f63590ff5
-  app: Jennifer-Noteful-V4
+  api_key:
+    secure: omGcUfnetFU6/fOcmeMYJ2NoNEUlT1zC7bPvK/AOU927B5xlSaUvd/5nlaBKCASbav/LIrRwK8uiwEtpQvhXOV3Fbpi3nw/WWlzudDF6SzID9y13fNLRvGtG3iKQPkDz6/kCBfRFlQdKR5PyUS1vizEIrogKpPZGMhwZnTBdJL8jUEY5PXkQLKEOblFd3uGvlerJl9lTMRNtU/eEgx5efvoB3sPe5kGptr+2SzaOQxT+Y7EE2zUR+J4ki3xqerlg0/AjOdOdqccqq5OAN3BNlApLr2v55cunJpCrk22x9P8vPGoHVJm7Qafx0fEFES9FQJ/DPnTsZ+t//b7EJRVYuN/n6p8suqObdSip0yRwOXS9VhcKlQtej72BSGSZFgkXih1hyTb4cDqX1sforS/S7d3ksWJ0En7oaUHuE4N7ssWE0FU2OPxDgyqn2r8bd6/Ga5TGUZpzXV02ZYauX/2fhor2bAT6M7hJ93ilohFcxzUNgL9R/ZAhwDMeI0raCuHS0YeoDWv8tA3rRyS7nBxvHci+UNMs5XJXuaxOrBiV+4+MpgrdFO4CoRlBC/BhHQf1pwyaZsSByV/Y8in4U7Y4j+KOAg4sNkQXjjyxl8tLiWvu29koYl9haRYT2Xj5Ewvrn38+MV1ObFibrRKx+ikAbpzJADXM+Z0g7ON20Uyvsuc=
+  app: 'yes'
   on:
     repo: thinkful-ei22/Jennifer-Noteful-V4
