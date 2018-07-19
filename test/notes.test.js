@@ -304,7 +304,7 @@ describe('Noteful API - Notes', function () {
         });
     });
 
-    it.only('should return an error when a tags `id` is not valid ', function () {//currently not validating tag ids in notes routes!
+    it('should return an error when a tags `id` is not valid ', function () {//currently not validating tag ids in notes routes!
       const newItem = {
         title: 'What about dogs?!',
         content: 'Lorem ipsum dolor sit amet, sed do eiusmod tempor...',
