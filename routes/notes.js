@@ -123,7 +123,7 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const { title, content, folderId, tags = [] } = req.body;
+  const { title, content, folderId, tags } = req.body;
   const userId = req.user.id;
   const newNote = { title, content, tags, userId };
   
@@ -155,9 +155,9 @@ router.post('/', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { title, content, folderId, tags = [] } = req.body;
+  const { title, content, folderId, tags } = req.body;
   const userId =req.user.id;
-  const updateNote = { title, content, tags,userId };
+  const updateNote = { title, content, tags, userId };
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
