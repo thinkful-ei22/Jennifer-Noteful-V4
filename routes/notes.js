@@ -12,14 +12,14 @@ const router = express.Router();
 router.use(('/', passport.authenticate('jwt', { session: false, failWithError: true })));
 
 const validateFolderId = function(folderId, userId){
-  if(folderId === undefined) {
+  if(folderId === null || folderId === '') {
     return Promise.resolve();
   }
-  if(!mongoose.Types.ObjectId.isValid(folderId)){
-    const err = new Error('The `folderId` is not valid');
-    err.status = 400;
-    return Promise.reject(err);
-  }
+  // if(!mongoose.Types.ObjectId.isValid(folderId)){
+  //   const err = new Error('The `folderId` is not valid');
+  //   err.status = 400;
+  //   return Promise.reject(err);
+  // }
   return Folder.count({_id: folderId, userId})
     .then(count => {
       if (count === 0) {
@@ -125,7 +125,7 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
   const userId = req.user.id;
-  const newNote = { title, content, folderId, tags, userId };
+  const newNote = { title, content, tags, userId };
   
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -133,7 +133,9 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-
+  if (mongoose.Types.ObjectId.isValid(folderId)) {
+    newNote.folderId = folderId;
+  }
   Promise.all([
     validateFolderId(folderId, userId), 
     validateTagIds(tags, userId)
@@ -155,7 +157,7 @@ router.put('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags = [] } = req.body;
   const userId =req.user.id;
-  const updateNote = { title, content, folderId, tags, userId };
+  const updateNote = { title, content, tags,userId };
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -169,7 +171,9 @@ router.put('/:id', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-
+  if (mongoose.Types.ObjectId.isValid(folderId)) {
+    updateNote.folderId = folderId;
+  }
   Promise.all([
     validateFolderId(folderId, userId),
     validateTagIds(tags, userId)
