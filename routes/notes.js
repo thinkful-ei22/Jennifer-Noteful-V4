@@ -39,6 +39,19 @@ const validateTagIds = function(tags, userId){
     err.status = 400;
     return Promise.reject(err);
   }
+  if(tags){
+    let isValid =true;
+    tags.forEach(tag => { 
+      if(!mongoose.Types.ObjectId.isValid(tag)){
+        isValid = false;
+      }    
+    });
+    if(!isValid){
+      const err = new Error('The `tagId` is not valid');
+      err.status = 400;
+      return Promise.reject(err);
+    }
+  }
   return Tag.find({$and: [{_id: {$in: tags }, userId}]})
     .then(results =>{
       if(tags.length !== results.length){
@@ -48,6 +61,7 @@ const validateTagIds = function(tags, userId){
       }
     });
 };
+
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
@@ -176,7 +190,7 @@ router.put('/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/:id', (req, res, next) => {
   const { id } = req.params;
-  const userId = req.body.id;
+  const userId = req.user.id;
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -185,7 +199,7 @@ router.delete('/:id', (req, res, next) => {
     return next(err);
   }
 
-  Note.findOneAndRemove({_id: id, userId})
+  Note.findOneAndRemove({_id:id, userId})
     .then(() => {
       res.sendStatus(204);
     })

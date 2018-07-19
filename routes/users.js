@@ -7,9 +7,9 @@ const passport = require('passport');
 
 // router.use(('/', passport.authenticate('jwt', { session: false, failWithError: true })));
 router.post('/users', (req, res, next)=>{
-  let {fullName, username, password} = req.body;
+  
   //validate that all required fields complete
-
+  
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
   
@@ -23,7 +23,7 @@ router.post('/users', (req, res, next)=>{
   }
   //validate that all inputs are strings
 
-  const stringFields = [fullName, username, password];
+  const stringFields = ['fullName', 'username', 'password'];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
   );
@@ -32,7 +32,7 @@ router.post('/users', (req, res, next)=>{
     return res.status(422).json({
       code: 422,
       reason: 'ValidationError',
-      message: 'Incorrectfield type: expected string',
+      message: 'Incorrect field type: expected string',
       location: nonStringField
     });
   }
@@ -85,27 +85,41 @@ router.post('/users', (req, res, next)=>{
       location: tooSmallField || tooLargeField
     });
   }
-  
-  //hash the password and input the user with hashed PW in db.
-  return User.hashPassword(password)
+  let {fullName, username, password} = req.body;
+  fullName = fullName.trim();
+  return User.find({username})
+    .count()
+    .then(count => {
+      if (count > 0) {
+        // There is an existing user with the same username
+        return Promise.reject({
+          code: 422,
+          reason: 'ValidationError',
+          message: 'Username already taken',
+          location: 'username'
+        });
+      }
+      // If there is no existing user, hash the password
+      return User.hashPassword(password);
+    })
     .then(digest => {
       return User.create({
         username,
         password: digest,
         fullName
-      })
-        .then(user => {
-          return res.status(201).location(`/api/users/${user.id}`).json(user.apiRepr());//returned user will not display the PW
-        })
-        .catch(err => {
-          if(err.coe === 11000) {
-            err = new Error('The username already exists');
-            err.status = 400;
-          }
-          next(err);
-        });
+      });
+    })
+    .then(user => {
+      return res.status(201).location(`/api/users/${user.id}`).json(user.apiRepr());//returned user will not display the PW
+    })
+    .catch(err => {
+      if(err.reason === 'ValidationError') {
+        return res.status(err.code).json(err);
+      }
+      next(err);
     });
 });
+
 
 
 

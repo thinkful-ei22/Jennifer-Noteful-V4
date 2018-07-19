@@ -4,16 +4,21 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const mongoose = require('mongoose');
 const express = require('express');
-
+const jwt = require('jsonwebtoken');
 const app = require('../server');
 const Folder = require('../models/folder');
+const User = require('..models/user');
 const seedFolders = require('../db/seed/folders');
-const { TEST_MONGODB_URI } = require('../config');
+const seedUsers = require('../db/seed/users');
+const { TEST_MONGODB_URI, JWT_SECRET, JWT_EXPIRY } = require('../config');
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
 describe('Noteful API - Folders', function () {
+
+  let user;
+  let token;
 
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI)
@@ -22,9 +27,17 @@ describe('Noteful API - Folders', function () {
 
   beforeEach(function () {
     return Promise.all([
+      User.insertMany(seedUsers),
       Folder.insertMany(seedFolders),
-      Folder.createIndexes()
-    ]);
+      Folder.createIndexes(),
+    ])
+      .then(([users])=>{
+        user = users[0];
+        token = jwt.sign({user}, JWT_SECRET, {
+          subject: user.username,
+          expiresIn: JWT_EXPIRY
+        });
+      });
   });
 
   afterEach(function () {
@@ -39,8 +52,10 @@ describe('Noteful API - Folders', function () {
 
     it('should return a list sorted by name with the correct number of folders', function () {
       return Promise.all([
-        Folder.find().sort('name'),
-        chai.request(app).get('/api/folders')
+        Folder.find({userId: user.id}).sort('name'),
+        chai.request(app)
+          .get('/api/folders')
+          .set('Authorization', `Bearer ${token}`)
       ])
         .then(([data, res]) => {
           expect(res).to.have.status(200);
@@ -52,8 +67,10 @@ describe('Noteful API - Folders', function () {
 
     it('should return a list with the correct fields and values', function () {
       return Promise.all([
-        Folder.find().sort('name'),
-        chai.request(app).get('/api/folders')
+        Folder.find({userId: user.id}).sort('name'),
+        chai.request(app)
+          .get('/api/folders')
+          .set('Authorization', `Bearer ${token}`)
       ])
         .then(([data, res]) => {
           expect(res).to.have.status(200);
